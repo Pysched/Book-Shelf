@@ -138,11 +138,11 @@ def logout():
 
 # Profile Page
 @app.route('/profile/<username>', methods=["GET", "POST"])
-def profile(users): 
+def profile(username): 
 	# Check if user is logged in
 	if 'user' in session:
 		# If so get the user and pass him to template for now
-		user_in_db = users.find_one({"username": users})
+		user_in_db = users.find_one({"username": username})
 		return render_template('profile.html', user=user_in_db)
 	else:
 		flash("You must be logged in!")
