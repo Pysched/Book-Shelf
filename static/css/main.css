@@ -29,7 +29,13 @@ margin: auto;
 
 }
 
-/*--HR line --*/
+/*--HR line -- */
 .hr-line{
     background-color:#006168;
+}
+
+/* -- Login -- */
+.login{
+    border:2px solid #006168;
+    padding:1.25rem;
 }

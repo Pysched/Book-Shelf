@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template, redirect, request, url_for, session, flash
+from flask import Flask, render_template, redirect, request, url_for, session, flash, Markup
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 import bcrypt
+
 
 
 app = Flask(__name__)
@@ -19,7 +20,7 @@ users = mongo.db.users
 
 
 def get_username(username):
-    return users.find_one({"_id": str(users)})
+    return users.find_one({"username": username})
 
 
 # Home Page
@@ -41,64 +42,90 @@ def browse():
     return render_template("browse.html")
 
 
-# Login Page
 
-@app.route('/login', methods=['POST'])
+# Check user login details from login form
+@app.route('/login', methods=['GET'])
 def login():
-    users = mongo.db.users
-    login_user = users.find_one({'name' : request.form['username']})
+	# Check if user is not logged in already
+	if 'user' in session:
+		user_in_db = users.find_one({"username": session['user']})
+		if user_in_db:
+			# If so redirect user to his profile
+			flash("You are logged in already!")
+			return redirect(url_for('profile', user=user_in_db['username']))
+	else:
+		# Render the page for user to be able to log in
+		return render_template("login.html")
 
-    if login_user:
-        if bcrypt.hashpw(request.form['pass'].encode('utf-8'), login_user['password'].encode('utf-8')) == login_user['password'].encode('utf-8'):
-            session['username'] = request.form['username']
-            return redirect(url_for('index'))
-
-    return 'Invalid username/password combination'
-
+# Check user login details from login form
+@app.route('/user_auth', methods=['POST'])
+def user_auth():
+	form = request.form.to_dict()
+	user_in_db = users.find_one({"username": form['username']})
+	# Check for user in database
+	if user_in_db:
+		# If passwords match (hashed / real password)
+		if check_password_hash(user_in_db['password'], form['user_password']):
+			# Log user in (add to session)
+			session['user'] = form['username']
+			# If the user is admin redirect him to admin area
+			if session['user'] == "admin":
+				return redirect(url_for('admin'))
+			else:
+				flash("You were logged in!")
+				return redirect(url_for('profile', username=user_in_db['username']))
+			
+		else:
+			flash("Wrong password or user name!")
+			return redirect(url_for('login'))
+	else:
+		flash("You must be registered!")
+		return redirect(url_for('register'))
 
 # Sign up
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    '''
-    Create new user/register new account
-    Checks that the user doesn't already exist, and that length of username
-    and password is between 6-15 characters
-    Uses generate_password_hash to hash user's password in the database
-    '''
-    if request.method == "POST":
+	# Check if user is not logged in already
+	if 'user' in session:
+		flash('You are already sign in!')
+		return redirect(url_for('index'))
+	if request.method == 'POST':
+		form = request.form.to_dict()
+		# Check if the password and password1 actualy match 
+		if form['new_password'] == form['new_password1']:
+			# If so try to find the user in db
+			user = users.find_one({"username" : form['new_username']})
+			if user:
+				flash(f"{form['new_username']} already exists!")
+				return redirect(url_for('register'))
+			# If user does not exist register new user
+			else:				
+				# Hash password
+				hash_pass = generate_password_hash(form['new_password'])
+				#Create new user with hashed password
+				users.insert_one(
+					{
+						'username': form['new_username'],
+						'email': form['new_email'],
+						'password': hash_pass
+					}
+				)
+				# Check if user is actualy saved
+				user_in_db = users.find_one({"username": form['new_username']})
+				if user_in_db:
+					# Log user in (add to session)
+					session['user'] = user_in_db['username']
+					return redirect(url_for('profile', user=user_in_db['username']))
+				else:
+					flash("There was a problem savaing your profile")
+					return redirect(url_for('register'))
 
-        new_username = request.form.get("new_username").lower()
-        new_password = request.form.get("new_password")
-        new_tagline = request.form.get("new_tagline")
-        new_email = request.form.get("new_email")
-        new_comment = request.form.get("new_comment")
-        
-        if len(new_username) < 3 or len(new_username) > 15:
-            
-            return redirect(url_for('register'))
+		else:
+			flash("Passwords dont match!")
+			return redirect(url_for('register'))
+		
+	return render_template("register.html")
 
-        if len(new_password) < 5 or len(new_password) > 15:
-          
-            return redirect(url_for('register'))
-
-        # Check if username already exists
-        existing_user = get_username(new_username)
-        if existing_user:
-            return redirect(url_for('register'))
-
-        # If all checks pass, add user to the database and hash the password
-        users.insert_one({
-            "username": new_username,
-            "password": generate_password_hash(new_password),
-            "tagline": new_tagline,
-            "email": new_email,
-            "comment": new_comment,
-        })
-        session["user"] = new_username
-
-        return redirect(url_for('main', username=session["user"]))
-
-    return render_template("register.html")
 
 
 # Log out
@@ -111,7 +138,7 @@ def logout():
 
 # Profile Page
 @app.route('/profile/<username>', methods=["GET", "POST"])
-def profile(username): 
+def profile(users): 
 	# Check if user is logged in
 	if 'user' in session:
 		# If so get the user and pass him to template for now
