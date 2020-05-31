@@ -1,3 +1,34 @@
+/* -- Footer Container Style -- */
+
+
 .foot{
     background-color:#006168!important;
+    margin-top:40px;
+}
+
+/* -- Social Icons -- */
+
+.icons{
+    color:#fff;
+    transition:transform .2s;
+}
+
+.icons.fa-github:hover{
+    color:#6f38d4;
+    transform: scale(1.2) ;
+}
+
+.icons.fa-twitter:hover{
+    color:#03a0fb;
+    transform: scale(1.2) ;
+}
+
+.icons.fa-linkedin-square:hover{
+    color:#2c7bd6;
+    transform: scale(1.2) ;
+}
+
+.icons.fa-slack:hover{
+    color:#b54acf;
+    transform: scale(1.2) ;
 }

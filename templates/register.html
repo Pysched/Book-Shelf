@@ -2,7 +2,67 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h3>Register Page</h3>
+<h1> Profile Page </h1>
+
+<div class="container register">
+	
+    <h3>Lets add some information about you</h3>
+		<div class="card mx-auto">
+			<div class="card-body">
+				<form class="form-signin" method="POST" action="/register">
+					<div class="form-group">
+						<label for="new_username">User name</label>
+						<input name="new_username" type="text" class="form-control" id="new_username" placeholder="Profile name" required>
+					</div>
+
+                    <div class="form-group">
+						<label for="new_tagline">Tagline</label>
+						<input name="new_tagline" type="textarea" class="form-control" id="new_tagline" placeholder="Profile name" required>
+					</div>
+
+                    <div class="form-group">
+                        <label for="title">Select list:</label>
+                            <select class="form-control" name="title" id="title">
+                            {% for title in title %}
+                                <option>{{ titles }}</option>
+                              {% endfor %}  
+                            </select>
+                    </div> 
+                    
+					<div class="form-group">
+						<label for="new_email">Email</label>
+						<input name="new_email" type="email" class="form-control" id="new_email" placeholder="Please enter a valid email">
+					</div>
+					<div class="form-group">
+						<label for="new_password">Password</label>
+						<input class="form-control" name="new_password" type="password" id="new_password" placeholder="Password" required>
+					</div>
+					<div class="form-group">
+						<label for="new_password">Confirm Password</label>
+						<input class="form-control" name="new_password1" type="password" id="new_password1" placeholder="Password Confirm" required>
+					</div>
+                    <br>
+                    <hr class="hr-line">
+                    <br>
+
+                    <div class="form-group">
+						<label for="new_comment">Tell us why are are here:</label>
+						<input name="new_comment" type="textarea" class="form-control" id="new_comment" placeholder="Please enter a valid email">
+					</div>
+
+                     <div class="form-group">
+                        <label for="comment">Why are you here:</label>
+                        <textarea class="form-control" type="text" rows="5" id="comment" name="comment"></textarea>
+                    </div> 
+                   
+                    <br>
+					<button class="btn btn-outline-success btn-lg btn-block" type="submit">Register</button>
+				</form>
+			</div>
+		</div>
+	</div>
+<div class="container space"></div>
 
 
- {% endblock %}
+
+{% endblock %}

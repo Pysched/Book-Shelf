@@ -1,11 +1,35 @@
-.page{
-    background-color: red;
-}
 
-.caro{
-    align-content: center;
-}
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
 .container.para{
     margin-top:75px!important;
+}
+
+div.c-wrapper{
+    width: 80%; /* for example */
+    margin: auto;
+}
+
+.carousel-inner > .item > img, 
+.carousel-inner > .item > a > img{
+width: 100%; /* use this, or not */
+margin: auto;
+}
+
+.carousel{
+    margin-left:auto;
+    margin-right:auto;
+    align-items: center;
+    justify-content: center;
+    display: grid;
+
+}
+
+/*--HR line --*/
+.hr-line{
+    background-color:#006168;
 }
